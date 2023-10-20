@@ -49,7 +49,8 @@ def make_user_base():
               ' 0 - выход без сохранения информации\n'
               ' 10 - получить список всех компаний и количество вакансий у каждой\n'
               ' 11 - получить список всех вакансий с указанием компании, названием вакансии, зарплаты и ссылки на вакансию\n'
-              ' 12 - получить среднюю зарплату по всем вакансиям')
+              ' 12 - получить среднюю зарплату по всем вакансиям\n'
+              ' 14 - получить список вакансий с зарплатой выше средней')
         option = int(input())
         if option == 0:
             print('Информация не сохранена. Всего доброго!')  # файл со списком вакансий для пользователя не создаем
@@ -72,11 +73,14 @@ def make_user_base():
         elif option == 4:
             print('Введите искомое слово:')
             user_word = input()
-            user_word_lower = user_word.lower()
-            #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по заданному слову
-            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            user_base = UserBase(list_base)
-            user_base.print_user_list(user_base.find_word(user_word_lower))
+            #user_word_lower = user_word.lower()
+            # #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по заданному слову
+            # print('       ВЫБРАННЫЕ ВАКАНСИИ:')
+            # user_base = UserBase(list_base)
+            # user_base.print_user_list(user_base.find_word(user_word_lower))
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.get_vacancies_with_keyword1(user_word)
         elif option == 3:
             #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по нулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
@@ -114,7 +118,11 @@ def make_user_base():
         elif option == 12:
             conn = None
             db_manager = DBManager(conn)
-            db_manager.count_salary_avg()
+            db_manager.get_avg_salary()
+        elif option == 14:
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.get_vacancies_with_higher_salary()
         else:
             continue
 

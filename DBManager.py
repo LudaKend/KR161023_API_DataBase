@@ -63,22 +63,64 @@ class DBManager:
         cur.close()
         return currency_rate
 
-    def count_salary_avg(self):
-        '''определяем среднюю зарплату по вакансии и записываем в БД, заполняя доп.поля'''
-        cur = self.conn.cursor()  # создаем курсор
-        cur.execute('SELECT AVG(salary_avg) FROM vacancies WHERE salary_avg <> 0')
-        salary_avg = cur.fetchall()
-        print(salary_avg)
-        cur.close()
 
     def get_avg_salary(self):
         '''получает среднюю зарплату по вакансиям.'''
-        pass
+        cur = self.conn.cursor()  # создаем курсор
+        cur.execute('SELECT AVG(salary_avg) FROM vacancies WHERE salary_avg <> 0')
+        salary_avg = cur.fetchall()
+        print(f'Это средняя зарплата {salary_avg[0]}')
+        cur.close()
+        list_salary_avg = list(salary_avg[0])
+        print(list_salary_avg)
+        return list_salary_avg
+
 
     def get_vacancies_with_higher_salary(self):
         '''получает список всех вакансий, у которых зарплата выше средней по всем вакансиям.'''
-        pass
+        cur = self.conn.cursor()  # создаем курсор
+        list_salary_avg = self.get_avg_salary()
+        #cur.execute('SELECT * FROM vacancies WHERE salary_avg > %s', salary_avg)
+        cur.execute('SELECT * FROM vacancies')
+        rows = cur.fetchall()
+        #print(rows)
+        for row in rows:
+            list_row = list(row)
+            #print(list_row)
+            #print(list_row[9])
+            if list_row[9] > list_salary_avg[0]:
+                print(list_row)
+        cur.close()
 
-    def get_vacancies_with_keyword(self):
-        '''получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python.'''
-        pass
+    def get_vacancies_with_keyword(self, user_word_lower):
+        '''получает список всех вакансий, в названии которых содержатся переданные в метод слова'''
+        cur = self.conn.cursor()  # создаем курсор
+        cur.execute('SELECT * FROM vacancies')
+        rows = cur.fetchall()
+        # print(rows)
+        for row in rows:
+            list_row = list(row)
+            print(list_row[1])
+            print(list_row[7])
+            if user_word_lower in list_row[1]:
+                print(list_row)
+            elif user_word_lower in list_row[7]:
+                print(list_row)
+            else:
+                continue
+        cur.close()
+
+    def get_vacancies_with_keyword1(self, user_word):
+        '''получает список всех вакансий, в названии которых содержатся переданные в метод слова'''
+        cur = self.conn.cursor()  # создаем курсор
+        sql_select = "SELECT * FROM vacancies WHERE vacancy_name LIKE ('%s%')" % (user_word))
+        cur.execute(sql_select, (user_word,))
+        #cur.execute("SELECT * FROM vacancies WHERE vacancy_name LIKE ('%%%s%%')", (user_word,))
+        rows = cur.fetchall()
+        print(rows)
+        for row in rows:
+            print(row)
+
+        cur.close()
+
+

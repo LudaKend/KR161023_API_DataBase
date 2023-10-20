@@ -112,7 +112,7 @@ class ForAPI_hh(ForAPI):
             #print(data)
             cls.list_vacancies.append(data)
         #print('это список словарей cls.list_vacancies:')
-        print(cls.list_vacancies)
+        #print(cls.list_vacancies)
         return cls.list_vacancies
 
 # class ForAPI_superjob(ForAPI):
