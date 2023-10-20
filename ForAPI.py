@@ -37,7 +37,7 @@ class ForAPI(ABC):
         data = self.list_vacancies
         #print('это то, что записываем в csv-файл:')
         #print(data)
-        table_head = ['id', 'name', 'salary_from', 'salary_to', 'currency', 'gross', 'url', 'requirement', 'employer']
+        table_head = ['id', 'name', 'salary_from', 'salary_to', 'currency', 'gross', 'url', 'requirement', 'employer_id', 'employer_name']
         with open(filename, 'w', encoding='utf-8') as f:
             #json.dump(data, f)
             file_writer = csv.DictWriter(f, lineterminator="\r", fieldnames=table_head)
@@ -77,8 +77,13 @@ class ForAPI_hh(ForAPI):
             id_item = temp_dict['id']
             name = temp_dict['name']
             salary = temp_dict['salary']
+
             url = temp_dict['url']
-            employer = temp_dict['employer']
+            requirement = temp_dict['snippet']['requirement']
+            employer_id = temp_dict['employer']['id']
+            employer_name = temp_dict['employer']['name']
+            # responsibility = temp_dict['snippet']['responsibility']
+            #решаем проблемы с незаполненными полями по зарплате
             if salary == None:
                 salary_from = 0
                 salary_to = 0
@@ -89,11 +94,21 @@ class ForAPI_hh(ForAPI):
                 salary_to = temp_dict['salary']['to']
                 currency = temp_dict['salary']['currency']
                 gross = temp_dict['salary']['gross']
-            requirement = temp_dict['snippet']['requirement']
-            #responsibility = temp_dict['snippet']['responsibility']
-            employer = temp_dict['employer']['name']
-            data = {'id':id_item, 'name':name, 'salary_from':salary_from, 'salary_to':salary_to, 'currency':currency,
-                    'gross':gross, 'url':url, 'requirement':requirement, 'employer':employer}
+            if salary_from == None:
+                salary_from = 0
+            if salary_to == None:
+                salary_to = 0
+            if currency == None:
+                currency = 'RUR'
+            if gross == False or gross == None:
+                gross_bd = 0
+            else:
+                gross_bd = 1
+
+            data = {'id':id_item, 'name': name, 'salary_from': salary_from, 'salary_to': salary_to,
+                    'currency': currency,
+                    'gross': gross_bd, 'url': url, 'requirement': requirement, 'employer_id': employer_id,
+                    'employer_name':employer_name}
             #print(data)
             cls.list_vacancies.append(data)
         #print('это список словарей cls.list_vacancies:')
@@ -120,28 +135,3 @@ class ForAPI_hh(ForAPI):
 #         #print(cls.all_vacancies)
 #         return cls.all_vacancies
 #
-#     @classmethod
-#     def make_list_vacancies(cls):
-#         '''из полученного массива данных формируем список словарей нужной структуры'''
-#         cls.list_vacancies = []
-#         #print(cls.all_vacancies)
-#         for vacancy in cls.all_vacancies['objects']:
-#             # print()
-#             # print(vacancy)
-#             temp_dict = vacancy
-#             #print(temp_dict)
-#             id_item = temp_dict['id']
-#             name = temp_dict['profession']
-#             url = temp_dict['link']
-#             salary_from = temp_dict['payment_from']
-#             salary_to = temp_dict['payment_to']
-#             currency = temp_dict['currency']
-#             gross = True
-#             requirement = temp_dict['candidat']
-#             data = {'id': id_item, 'name': name, 'salary_from': salary_from, 'salary_to': salary_to,
-#                     'currency': currency, 'gross': gross, 'url': url, 'requirement': requirement}
-#             # print(data)
-#             cls.list_vacancies.append(data)
-#         # print('это список словарей cls.list_vacancies:')
-#         # print(cls.list_vacancies)
-#         return cls.list_vacancies
