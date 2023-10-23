@@ -92,34 +92,18 @@ class DBManager:
                 print(list_row)
         cur.close()
 
-    def get_vacancies_with_keyword(self, user_word_lower):
-        '''получает список всех вакансий, в названии которых содержатся переданные в метод слова'''
-        cur = self.conn.cursor()  # создаем курсор
-        cur.execute('SELECT * FROM vacancies')
-        rows = cur.fetchall()
-        # print(rows)
-        for row in rows:
-            list_row = list(row)
-            print(list_row[1])
-            print(list_row[7])
-            if user_word_lower in list_row[1]:
-                print(list_row)
-            elif user_word_lower in list_row[7]:
-                print(list_row)
-            else:
-                continue
-        cur.close()
 
-    def get_vacancies_with_keyword1(self, user_word):
+    def get_vacancies_with_keyword(self, user_word):
         '''получает список всех вакансий, в названии которых содержатся переданные в метод слова'''
         cur = self.conn.cursor()  # создаем курсор
-        sql_select = "SELECT * FROM vacancies WHERE vacancy_name LIKE ('%s%')" % (user_word))
-        cur.execute(sql_select, (user_word,))
-        #cur.execute("SELECT * FROM vacancies WHERE vacancy_name LIKE ('%%%s%%')", (user_word,))
+        cur.execute("""SELECT * FROM vacancies WHERE vacancy_name LIKE(%s)""", (f'%{user_word}%',))
         rows = cur.fetchall()
-        print(rows)
-        for row in rows:
-            print(row)
+        print(f'что нашли в vacancy_name:{rows}')
+        cur.execute("""SELECT * FROM vacancies WHERE requirement LIKE(%s)""", (f'%{user_word}%',))
+        rows = cur.fetchall()
+        print(f'что нашли в requirement:{rows}')
+        # for row in rows:
+        #     print(row)
 
         cur.close()
 

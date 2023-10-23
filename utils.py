@@ -53,7 +53,7 @@ def make_user_base():
               ' 14 - получить список вакансий с зарплатой выше средней')
         option = int(input())
         if option == 0:
-            print('Информация не сохранена. Всего доброго!')  # файл со списком вакансий для пользователя не создаем
+            print('Информация не сохранена.')  # файл со списком вакансий для пользователя не создаем
             break
         elif option == 6:
             print('ИСХОДНЫЙ ПЕРЕЧЕНЬ ВАКАНСИЙ:')
@@ -80,7 +80,7 @@ def make_user_base():
             # user_base.print_user_list(user_base.find_word(user_word_lower))
             conn = None
             db_manager = DBManager(conn)
-            db_manager.get_vacancies_with_keyword1(user_word)
+            db_manager.get_vacancies_with_keyword(user_word)
         elif option == 3:
             #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по нулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
