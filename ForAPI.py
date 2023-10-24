@@ -55,6 +55,26 @@ class ForAPI_hh(ForAPI):
         cls.list_vacancies = []
         cls.name_array = 'vacancies_hh'
 
+    # params = {
+    #     #         'employer_id': 3529,  # ID 2ГИС
+    #     #         'area': area,         # Поиск в зоне
+    #     #         'page': page,         # Номер страницы
+    #     #         'per_page': 100       # Кол-во вакансий на 1 странице
+    #     #     }
+    #     #     req = requests.get('https://api.hh.ru/vacancies', params)
+    #     URL_SITE_HH = 'https://api.hh.ru/vacancies/'
+
+    @classmethod
+    def make_requests_employer_id(cls, user_employer_name):
+        '''выполняем API запрос к сайту hh.ru, получаем массив данных'''
+        params = {'employer_id': {user_employer_name}, 'area': 113, 'per_page': 100}
+        cls.responce = requests.get(cls.url_site, params)
+        print(cls.responce.status_code)
+        # print(cls.responce.text)
+        cls.all_vacancies = json.loads(cls.responce.text)
+        # print(all_vacancies)
+        return cls.all_vacancies
+
     @classmethod
     def make_requests(cls):
         '''выполняем API запрос к сайту hh.ru, получаем массив данных'''

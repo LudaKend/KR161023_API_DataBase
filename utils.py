@@ -39,26 +39,22 @@ def make_user_base():
     while True:
         print()
         print('Выберите опцию:\n'
-              ' 2 - сортировать по возврастанию среднего размера оплаты\n'
-              ' 3 - выбрать только те вакансии, в которых указан размер оплаты\n'
-              ' 4 - выбрать вакансии с указанным словом\n'
-              ' 5 - выбрать вакансии с оплатой выше указанной суммы\n'
-              ' 6 - возврат к исходному списку вакансий\n'
-              ' 7 - сохранить в файл, полученный на экране список вакансий\n'
               ' 0 - выход без сохранения информации\n'
+              ' 11 - получить список всех вакансий с указанием компании, названия вакансии, зарплаты и ссылки'
+              ' на вакансию\n'
+              ' 1 - сортировать по возврастанию среднего размера оплаты\n'
+              ' 2 - выбрать только те вакансии, в которых указан размер оплаты\n'
+              ' 3 - получить среднюю зарплату по всем вакансиям\n'
+              ' 14 - получить список вакансий с зарплатой выше средней'
+              ' 4 - выбрать вакансии с оплатой выше указанной суммы\n'
+              ' 5 - выбрать вакансии с указанным словом\n'
+              ' 7 - сохранить в файл, полученный на экране список вакансий\n'
               ' 10 - получить список всех компаний и количество вакансий у каждой\n'
-              ' 11 - получить список всех вакансий с указанием компании, названием вакансии, зарплаты и ссылки на вакансию\n'
-              ' 12 - получить среднюю зарплату по всем вакансиям\n'
-              ' 14 - получить список вакансий с зарплатой выше средней')
+              ' 12 - получить список вакансий по работодателю')
         option = int(input())
         if option == 0:
             print('Информация не сохранена.')  # БД со списком вакансий для пользователя не создаем
             break
-        elif option == 6:
-            print('ИСХОДНЫЙ ПЕРЕЧЕНЬ ВАКАНСИЙ:')
-            conn = None
-            db_manager = DBManager(conn)
-            db_manager.get_all_vacancies()  # выводим на экран исходный список вакансий
         elif option == 7:
             #здесь надо вызвать метод из класса UserBase для сохранения экземпляров класса UserBase в файл
             if list_user_base == []:
@@ -70,7 +66,7 @@ def make_user_base():
                 user_base.to_json(user_name, resourse, list_user_base)
             print(f'\nИнформация о вакансиях сохранена в файл "{user_name}_{resourse}"')
             break
-        elif option == 4:
+        elif option == 5:
             print('Введите искомое слово:')
             user_word = input()
             #user_word_lower = user_word.lower()
@@ -79,7 +75,7 @@ def make_user_base():
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_vacancies_with_keyword(user_word)
-        elif option == 3:
+        elif option == 2:
             #вызываем метод из класса DBManager для фильтрации вакансий по ненулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             # user_base = UserBase(list_base)
@@ -87,13 +83,13 @@ def make_user_base():
             conn = None
             db_manager = DBManager(conn)
             db_manager.take_non_zero()
-        elif option == 2:
+        elif option == 1:
             #вызываем метод из класса DBManager для сортировки вакансий по возрастанию средней зарплаты')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
             db_manager.sort_max_salary()
-        elif option == 5:
+        elif option == 4:
             #вызываем метод из класса DBManager для выбора вакансий с min зарплатой >= указанной суммы')
             print('Введите сумму оплаты, ниже которой вакансии не рассматривать:')
             user_salary = int(input())
@@ -102,22 +98,38 @@ def make_user_base():
             db_manager = DBManager(conn)
             db_manager.take_only_big(user_salary)
         elif option == 10:
-            # вызываем метод из класса DBManager
+            # вызываем метод из класса DBManager, чтобы получить список всех компаний и количество вакансий у каждой
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_companies_and_vacancies_count()
             db_manager.disables_db()
         elif option == 11:
-            # вызываем метод из класса DBManager
+            # вызываем метод из класса DBManager для вывода всех вакансий из БД с указанием компании,
+            # названием вакансии, зарплаты и ссылки на вакансию
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_all_vacancies()
             db_manager.disables_db()
-        elif option == 12:
+        elif option == 3:
+            # вызываем метод из класса DBManager чтобы получить среднюю зарплату по всем вакансиям
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_avg_salary()
         elif option == 14:
+            # вызываем метод из класса DBManager чтобы получить список вакансий с зарплатой выше средней
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.get_vacancies_with_higher_salary()
+        elif option == 12:
+            # вызываем метод из класса ForAPI, чтобы загрузить в БД список вакансий по указанному работодателю
+            print('Введите название работодателя')
+            user_employer_name = int(input())
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
+            make_requests_employer_id(user_employer_name)
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_vacancies_with_higher_salary()

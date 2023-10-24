@@ -10,8 +10,15 @@ PASSWORD = os.getenv('FOR_POSTGRES')
 #попробую расширить возможности API
 #URL_SITE_HH = 'https://api.hh.ru/vacancies/?per_page=100&count=200'  #безуспешно, тоже самое
 #URL_SITE_HH = 'https://api.hh.ru/vacancies/?page=10&per_page=10'     #безуспешно, тоже самое
-URL_SITE_HH = 'https://api.hh.ru/vacancies/?employer_id=1740'
-
+# URL_SITE_HH = 'https://api.hh.ru/vacancies/?employer_id=1740'
+# params = {
+#         'employer_id': 3529,  # ID 2ГИС
+#         'area': area,         # Поиск в зоне
+#         'page': page,         # Номер страницы
+#         'per_page': 100       # Кол-во вакансий на 1 странице
+#     }
+#     req = requests.get('https://api.hh.ru/vacancies', params)
+URL_SITE_HH = 'https://api.hh.ru/vacancies/'
 
 #URL_SITE_SUPERJOB = 'https://api.superjob.ru/2.0/vacancies/?t=4&count=10'
 #print(len(URL_SITE_HH))

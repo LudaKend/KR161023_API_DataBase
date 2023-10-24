@@ -33,16 +33,6 @@ class DBManager:
         '''отключает БД'''
         self.conn.close()
 
-    def get_all_vacancies(self):
-        '''получает список всех вакансий из БД'''
-        cur = self.conn.cursor()  # создаем курсор
-        cur.execute('SELECT * FROM vacancies')
-        # выводим выбранные из БД записи
-        rows = cur.fetchall()
-        for row in rows:
-            print(row)
-        cur.close()
-
     def take_non_zero(self):
         '''получает список вакансий из БД, в которых указан размер оплаты'''
         cur = self.conn.cursor()  # создаем курсор
