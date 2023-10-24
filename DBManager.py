@@ -33,6 +33,47 @@ class DBManager:
         '''отключает БД'''
         self.conn.close()
 
+    def get_all_vacancies(self):
+        '''получает список всех вакансий из БД'''
+        cur = self.conn.cursor()  # создаем курсор
+        cur.execute('SELECT * FROM vacancies')
+        # выводим выбранные из БД записи
+        rows = cur.fetchall()
+        for row in rows:
+            print(row)
+        cur.close()
+
+    def take_non_zero(self):
+        '''получает список вакансий из БД, в которых указан размер оплаты'''
+        cur = self.conn.cursor()  # создаем курсор
+        cur.execute('select * from vacancies WHERE salary_from <> 0 OR salary_to <> 0')
+        # выводим выбранные из БД записи
+        rows = cur.fetchall()
+        for row in rows:
+            print(row)
+        cur.close()
+
+    def sort_max_salary(self):
+        '''получает из БД список вакансий, отсортированный в порядке возрастания средней зарплаты'''
+        cur = self.conn.cursor()  # создаем курсор
+        cur.execute('select vacancy_id, vacancy_name, salary_avg from vacancies ORDER BY salary_avg')
+        # выводим выбранные из БД записи
+        rows = cur.fetchall()
+        for row in rows:
+            print(row)
+        cur.close()
+
+    def take_only_big(self, user_salary):
+       '''получает из БД список вакансий с min зарплатой >= указанной суммы'''
+       cur = self.conn.cursor()  # создаем курсор
+       cur.execute("""select vacancy_id, vacancy_name, salary_from_rub, salary_to_rub from vacancies 
+       WHERE salary_from_rub >= (%s)""", (f'{user_salary}',))
+       # выводим выбранные из БД записи
+       rows = cur.fetchall()
+       for row in rows:
+           print(row)
+       cur.close()
+
     def get_companies_and_vacancies_count(self):
         '''получает список всех компаний и количество вакансий у каждой компании'''
         cur = self.conn.cursor()  # создаем курсор
@@ -104,7 +145,6 @@ class DBManager:
         print(f'что нашли в requirement:{rows}')
         # for row in rows:
         #     print(row)
-
         cur.close()
 
 

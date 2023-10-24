@@ -39,8 +39,7 @@ def make_user_base():
     while True:
         print()
         print('Выберите опцию:\n'
-              ' 1 - сортировать по возврастанию МИНИМАЛЬНОГО размера оплаты\n'
-              ' 2 - сортировать по возврастанию МАКСИМАЛЬНОГО размера оплаты\n'
+              ' 2 - сортировать по возврастанию среднего размера оплаты\n'
               ' 3 - выбрать только те вакансии, в которых указан размер оплаты\n'
               ' 4 - выбрать вакансии с указанным словом\n'
               ' 5 - выбрать вакансии с оплатой выше указанной суммы\n'
@@ -53,12 +52,13 @@ def make_user_base():
               ' 14 - получить список вакансий с зарплатой выше средней')
         option = int(input())
         if option == 0:
-            print('Информация не сохранена.')  # файл со списком вакансий для пользователя не создаем
+            print('Информация не сохранена.')  # БД со списком вакансий для пользователя не создаем
             break
         elif option == 6:
             print('ИСХОДНЫЙ ПЕРЕЧЕНЬ ВАКАНСИЙ:')
-            make_start_base(user_name,resourse)  # выводим на экран исходный список вакансий
-            list_user_base = []
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.get_all_vacancies()  # выводим на экран исходный список вакансий
         elif option == 7:
             #здесь надо вызвать метод из класса UserBase для сохранения экземпляров класса UserBase в файл
             if list_user_base == []:
@@ -74,35 +74,33 @@ def make_user_base():
             print('Введите искомое слово:')
             user_word = input()
             #user_word_lower = user_word.lower()
-            # #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по заданному слову
-            # print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            # user_base = UserBase(list_base)
-            # user_base.print_user_list(user_base.find_word(user_word_lower))
+            #вызываем метод из класса DBManager для фильтрации вакансий по заданному слову
+            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
             db_manager.get_vacancies_with_keyword(user_word)
         elif option == 3:
-            #вызываем метод из класса UserBase для фильтрации экземпляров класса UserBase по нулевой зарплате')
+            #вызываем метод из класса DBManager для фильтрации вакансий по ненулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            user_base = UserBase(list_base)
-            user_base.print_user_list(user_base.take_non_zero())
+            # user_base = UserBase(list_base)
+            # user_base.print_user_list(user_base.take_non_zero())
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.take_non_zero()
         elif option == 2:
-            #вызываем метод из класса UserBase для сортировки экземпляров класса UserBase по возрастанию max зарплаты')
+            #вызываем метод из класса DBManager для сортировки вакансий по возрастанию средней зарплаты')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            user_base = UserBase(list_base)
-            user_base.print_user_list(user_base.sort_max_salary())
-        elif option == 1:
-            #вызываем метод из класса UserBase для сортировки экземпляров класса UserBase по возрастанию min зарплаты')
-            print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            user_base = UserBase(list_base)
-            user_base.print_user_list(user_base.sort_min_salary())
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.sort_max_salary()
         elif option == 5:
-            #вызываем метод из класса UserBase для выбора экземпляров класса UserBase с min зарплатой >= указанной')
+            #вызываем метод из класса DBManager для выбора вакансий с min зарплатой >= указанной суммы')
             print('Введите сумму оплаты, ниже которой вакансии не рассматривать:')
             user_salary = int(input())
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
-            user_base = UserBase(list_base)
-            user_base.print_user_list(user_base.take_only_big(user_salary))
+            conn = None
+            db_manager = DBManager(conn)
+            db_manager.take_only_big(user_salary)
         elif option == 10:
             # вызываем метод из класса DBManager
             conn = None
@@ -172,37 +170,16 @@ def write_data():
                         (line['employer_id'], line['employer_name']))
 
             # записываем информацию о вакансии в таблицу vacancies
-            cur.execute('INSERT INTO vacancies(vacancy_id, vacancy_name, salary_from, salary_to, currency_id, gross, url,'
-                ' requirement, employer_id, salary_from_rub, salary_to_rub, salary_avg) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
+            cur.execute('INSERT INTO vacancies(vacancy_id, vacancy_name, salary_from, salary_to, currency_id, '
+                        'gross, url, requirement, employer_id, salary_from_rub, salary_to_rub, salary_avg) '
+                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
                 (line['id'], line['name'], line['salary_from'], line['salary_to'], line['currency'], line['gross'],
                  line['url'], line['requirement'], line['employer_id'], salary_from_rub, salary_to_rub, salary_avg))
 
-    # except psycopg2.errors.UniqueViolation:
-    #     print(f'запись с таким ключом уже есть в таблице {table_name}')
-    # except psycopg2.errors.InFailedSqlTransaction:
-    #     print('текущая транзакция прервана, команды до конца блока транзакции игнорируются')
-    # else:
             cur.close()
             conn.commit()
     conn.close()
-# создаем курсор
-# cur = conn.cursor()
 
-# # проверяем записи в таблице employees
-# cur.execute("SELECT *FROM employees")
-# rows = cur.fetchall()
-# for row in rows:
-#     print(row)
-# # проверяем записи в таблице customers
-# cur.execute("SELECT *FROM customers")
-# rows = cur.fetchall()
-# for row in rows:
-#     print(row)
-# # проверяем записи в таблице orders
-# cur.execute("SELECT *FROM orders")
-# rows = cur.fetchall()
-# for row in rows:
-#     print(row)
 
 
 
