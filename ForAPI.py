@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import requests
 import json
-import os
-#from GeneralBase import GeneralBase
 import csv
 
 class ForAPI(ABC):
@@ -19,16 +17,6 @@ class ForAPI(ABC):
         pass
 
 
-    def to_json(self):
-        '''Записываем, полученный список словарей, в файл в формате JSON'''
-        with open(self.name_array, 'w') as f:
-            f.truncate(0)                    # очистим файл перед записью массива вакансий
-        data = self.list_vacancies
-        #print('это то, что записываем в json-файл:')
-        #print(data)
-        with open(self.name_array, 'w') as f:
-            json.dump(data, f)
-
     def to_file_csv(self):
         '''Записываем, полученный список словарей, в .csv файл'''
         filename = 'vacancies_hh' + '.csv'
@@ -37,7 +25,8 @@ class ForAPI(ABC):
         data = self.list_vacancies
         #print('это то, что записываем в csv-файл:')
         #print(data)
-        table_head = ['id', 'name', 'salary_from', 'salary_to', 'currency', 'gross', 'url', 'requirement', 'employer_id', 'employer_name']
+        table_head = ['id', 'name', 'salary_from', 'salary_to', 'currency', 'gross', 'url', 'requirement',
+                      'employer_id', 'employer_name']
         with open(filename, 'w', encoding='utf-8') as f:
             #json.dump(data, f)
             file_writer = csv.DictWriter(f, lineterminator="\r", fieldnames=table_head)
@@ -55,11 +44,31 @@ class ForAPI_hh(ForAPI):
         cls.list_vacancies = []
         cls.name_array = 'vacancies_hh'
 
+    # params = {
+    #     #         'employer_id': 3529,  # ID 2ГИС
+    #     #         'area': area,         # Поиск в зоне
+    #     #         'page': page,         # Номер страницы
+    #     #         'per_page': 100       # Кол-во вакансий на 1 странице
+    #     #     }
+    #     #     req = requests.get('https://api.hh.ru/vacancies', params)
+    #     URL_SITE_HH = 'https://api.hh.ru/vacancies/'
+
+    @classmethod
+    def make_requests_employer_id(cls, user_employer):
+        '''выполняем API запрос к сайту hh.ru, получаем массив данных'''
+        params = {'employer_id': {user_employer}, 'area': 113, 'per_page': 100}
+        cls.responce = requests.get(cls.url_site, params)
+        #print(cls.responce.status_code)
+        # print(cls.responce.text)
+        cls.all_vacancies = json.loads(cls.responce.text)
+        # print(all_vacancies)
+        return cls.all_vacancies
+
     @classmethod
     def make_requests(cls):
         '''выполняем API запрос к сайту hh.ru, получаем массив данных'''
         cls.responce = requests.get(cls.url_site)
-        print(cls.responce.status_code)
+        #print(cls.responce.status_code)
         #print(cls.responce.text)
         cls.all_vacancies = json.loads(cls.responce.text)
         #print(all_vacancies)
@@ -112,26 +121,7 @@ class ForAPI_hh(ForAPI):
             #print(data)
             cls.list_vacancies.append(data)
         #print('это список словарей cls.list_vacancies:')
-        print(cls.list_vacancies)
+        #print(cls.list_vacancies)
         return cls.list_vacancies
 
-# class ForAPI_superjob(ForAPI):
-#     '''класс для API с сайта superjob.ru'''
-#     api_key = os.getenv('API_KEY_superjob')
-#
-#     @classmethod
-#     def __init__(cls, url_site):
-#         super().__init__(url_site)
-#         cls.list_vacancies = []
-#         cls.name_array = 'vacancies_superjob'
-#
-#     @classmethod
-#     def make_requests(cls):
-#         '''выполняем API запрос к сайту superjob.ru, полученную информацию раскладываем в экземпляры класса'''
-#         cls.responce = requests.get(cls.url_site, headers={'X-Api-App-Id': cls.api_key})
-#         print(cls.responce.status_code)
-#         #print(cls.responce.text)
-#         cls.all_vacancies = json.loads(cls.responce.text)
-#         #print(cls.all_vacancies)
-#         return cls.all_vacancies
-#
+
