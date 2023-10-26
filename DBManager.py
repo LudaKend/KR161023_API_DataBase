@@ -30,7 +30,7 @@ class DBManager:
         rows = cur.fetchall()
         self.print_vacancies(rows)
         cur.close()
-
+        return rows
 
     def sort_max_salary(self):
         '''получает из БД список вакансий, отсортированный в порядке возрастания средней зарплаты'''
@@ -119,18 +119,22 @@ class DBManager:
     def get_vacancies_with_keyword(self, user_word):
         '''получает список всех вакансий, в названии которых содержатся переданные в метод слова'''
         cur = self.conn.cursor()  # создаем курсор
+        # cur.execute("""SELECT vacancy_id, vacancy_name, salary_from_rub, salary_to_rub, requirement, url
+        # FROM vacancies WHERE vacancy_name LIKE(%s)""", (f'%{user_word}%',))
+        # rows = cur.fetchall()
+        # #print(f'что нашли в vacancy_name:{rows}')
+        # self.print_vacancies(rows)
+        # cur.execute("""SELECT vacancy_id, vacancy_name, salary_from_rub, salary_to_rub, requirement, url
+        # FROM vacancies WHERE requirement LIKE(%s)""", (f'%{user_word}%',))
+
         cur.execute("""SELECT vacancy_id, vacancy_name, salary_from_rub, salary_to_rub, requirement, url 
-        FROM vacancies WHERE vacancy_name LIKE(%s)""", (f'%{user_word}%',))
-        rows = cur.fetchall()
-        #print(f'что нашли в vacancy_name:{rows}')
-        self.print_vacancies(rows)
-        cur.execute("""SELECT vacancy_id, vacancy_name, salary_from_rub, salary_to_rub, requirement, url 
-        FROM vacancies WHERE requirement LIKE(%s)""", (f'%{user_word}%',))
+                FROM vacancies WHERE vacancy_name LIKE(%s) OR requirement LIKE(%s)""",
+                    (f'%{user_word}%', f'%{user_word}%',))
         rows = cur.fetchall()
         #print(f'что нашли в requirement:{rows}')
         self.print_vacancies(rows)
         cur.close()
-
+        return rows
 
     def get_vacancies_employer(self, user_employer):
         '''получает список всех вакансий, у которых id работодателя равно введенному пользователем'''

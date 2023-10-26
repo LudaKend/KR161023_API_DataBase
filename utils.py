@@ -59,15 +59,18 @@ def make_data_base():
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
-            db_manager.get_vacancies_with_keyword(user_word)
+            rows = db_manager.get_vacancies_with_keyword(user_word)
+            #print(rows)
             db_manager.disables_db()  # отключаем БД
+            save_vacancies(rows)
         elif option == 3:
             #вызываем метод из класса DBManager для фильтрации вакансий по ненулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
-            db_manager.take_non_zero()
+            rows = db_manager.take_non_zero()
             db_manager.disables_db()  # отключаем БД
+            save_vacancies(rows)
         elif option == 2:
             #вызываем метод из класса DBManager для сортировки вакансий по возрастанию средней зарплаты')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
@@ -175,6 +178,45 @@ def write_data():
             conn.commit()
     conn.close()
 
+def save_vacancies(rows):
+    '''сохраняет, выбранные пользователем данные в обособленную БД'''
+    print('Сохранить выбранные вакансии? Y/N')
+    save_option = input()
+    if save_option == 'Y' or save_option == 'y' or save_option == 'да' or save_option == 'Да':
+
+        conn = None
+        db_manager = DBManager(conn)
+        conn = db_manager.connects_db()
+        cur = conn.cursor()  # создаем курсор
+        try:
+            cur.execute("""
+                CREATE TABLE user_vacancies (
+                    vacancy_id INT PRIMARY KEY,
+                    vacancy_name varchar(100),
+                    salary_from_rub real,
+                    salary_to_rub real,
+                    requirement varchar,
+                    url varchar
+                )
+            """)
+        except psycopg2.errors.DuplicateTable:
+            print('предыдущая пользовательская выборка удаляется')
+
+        cur.close()
+        conn.commit()
+        #предварительно удалим записи из пользовательской таблицы
+        cur = conn.cursor()  # создаем курсор
+        cur.execute('TRUNCATE TABLE user_vacancies')
+        cur.close()
+        conn.commit()
+        for row in rows:
+            cur = conn.cursor()  # создаем курсор на каждую запись
+            cur.execute('INSERT INTO user_vacancies(vacancy_id, vacancy_name, salary_from_rub, salary_to_rub,'
+                        ' requirement, url) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
+                        (row[0], row[1], row[2], row[3], row[4], row[5]))
+            cur.close()
+            conn.commit()
+        db_manager.disables_db()
 
 
 
