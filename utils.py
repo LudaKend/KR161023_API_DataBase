@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from ForAPI import ForAPI_hh
 from DBManager import DBManager
 URL_SITE_HH = 'https://api.hh.ru/vacancies/'
@@ -59,15 +60,18 @@ def make_data_base():
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
-            db_manager.get_vacancies_with_keyword(user_word)
+            rows = db_manager.get_vacancies_with_keyword(user_word)
+            #print(rows)
             db_manager.disables_db()  # отключаем БД
+            save_vacancies(rows)
         elif option == 3:
             #вызываем метод из класса DBManager для фильтрации вакансий по ненулевой зарплате')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
             conn = None
             db_manager = DBManager(conn)
-            db_manager.take_non_zero()
+            rows = db_manager.take_non_zero()
             db_manager.disables_db()  # отключаем БД
+            save_vacancies(rows)
         elif option == 2:
             #вызываем метод из класса DBManager для сортировки вакансий по возрастанию средней зарплаты')
             print('       ВЫБРАННЫЕ ВАКАНСИИ:')
@@ -134,7 +138,7 @@ def write_data():
     filename = 'vacancies_hh.csv'
     conn = psycopg2.connect(
         host='localhost',
-        database='KR161023_API_DataBase',
+        database='kr_api_database',
         user='postgres',
         password=PASSWORD
     )
@@ -143,7 +147,6 @@ def write_data():
     currency_rate = db_manager.get_currency_rate()
     dict_currency_rate = dict(currency_rate)
     #print(dict_currency_rate)
-    #try:
     with open(filename, encoding='utf-8') as f:
         data_file = csv.DictReader(f)
         for line in data_file:
@@ -175,6 +178,155 @@ def write_data():
             conn.commit()
     conn.close()
 
+def save_vacancies(rows):
+    '''сохраняет, выбранные пользователем данные в обособленную БД'''
+    print('Сохранить выбранные вакансии? Y/N')
+    save_option = input()
+    if save_option == 'Y' or save_option == 'y' or save_option == 'да' or save_option == 'Да':
+        conn = None
+        db_manager = DBManager(conn)
+        conn = db_manager.connects_db()
+        cur = conn.cursor()  # создаем курсор
+        try:
+            cur.execute("""
+                CREATE TABLE user_vacancies (
+                    vacancy_id INT PRIMARY KEY,
+                    vacancy_name varchar(100),
+                    salary_from_rub real,
+                    salary_to_rub real,
+                    requirement varchar,
+                    url varchar
+                )
+            """)
+        except psycopg2.errors.DuplicateTable:
+            print('предыдущая пользовательская выборка удаляется')
 
+        cur.close()
+        conn.commit()
+        #предварительно удалим записи из пользовательской таблицы
+        cur = conn.cursor()  # создаем курсор
+        cur.execute('TRUNCATE TABLE user_vacancies')
+        cur.close()
+        conn.commit()
+        for row in rows:
+            cur = conn.cursor()  # создаем курсор на каждую запись
+            cur.execute('INSERT INTO user_vacancies(vacancy_id, vacancy_name, salary_from_rub, salary_to_rub,'
+                        ' requirement, url) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING',
+                        (row[0], row[1], row[2], row[3], row[4], row[5]))
+            cur.close()
+            conn.commit()
+        db_manager.disables_db()
 
+def create_db(database):
+    '''удаляет и создает БД'''
+    database_name = database #'KR161023_API_DataBase1'
+    parser = ConfigParser()
+    parser.read("database.ini")   #считываем параметры для подключения к POSGRESQL
+    dict_db = {}
+    if parser.has_section("postgresql"):
+        params = parser.items("postgresql")
+        for param in params:
+            dict_db[param[0]] = param[1]
+    else:
+        raise Exception(
+            'Section {0} is not found in the {1} file.'.format(database_name, "database.ini"))
+    dict_db['password'] = PASSWORD
 
+    conn = psycopg2.connect(dbname='postgres', **dict_db)
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    cur.execute(f"DROP DATABASE IF EXISTS {database_name}")
+    cur.execute(f"CREATE DATABASE {database_name}")
+    cur.close()
+    conn.close()
+    # создаем таблицы в БД
+    conn = None
+    db_manager = DBManager(conn)
+    conn = db_manager.connects_db()
+    create_table_employers(conn)
+    create_table_currency(conn)
+    create_table_vacancies(conn)
+    write_currency(conn)  # заполняем справочник курсов валют
+    db_manager.disables_db()
+
+def create_table_employers(conn):
+    '''создает таблицу employers в БД'''
+    try:
+        cur = conn.cursor()
+        cur.execute("""CREATE TABLE employers (
+                employer_id INTEGER PRIMARY KEY,
+                employer_name VARCHAR(100)
+            )
+        """)
+        conn.commit()
+        cur.close()
+    except psycopg2.errors.DuplicateTable:
+        print('таблица employers уже создана')
+        cur.close()
+    except psycopg2.errors.InFailedSqlTransaction:
+        cur.close()
+
+def create_table_currency(conn):
+    '''создает таблицу currency в БД'''
+    try:
+        cur = conn.cursor()
+        cur.execute("""CREATE TABLE currency (
+                currency_id varchar(3) PRIMARY KEY,
+                currency_name varchar(20),
+                exchange_rate real	
+            )
+        """)
+        conn.commit()
+        cur.close()
+    except psycopg2.errors.DuplicateTable:
+        print('таблица currency уже создана')
+    except psycopg2.errors.InFailedSqlTransaction:
+        cur.close()
+
+def create_table_vacancies(conn):
+    '''создает таблицу vacancies в БД'''
+    try:
+        cur = conn.cursor()
+        cur.execute("""CREATE TABLE vacancies (
+                vacancy_id INTEGER PRIMARY KEY,
+                vacancy_name varchar(100),
+                salary_from real,
+                salary_to real,
+                currency_id varchar(3),
+                gross INTEGER,
+                url varchar,
+                requirement varchar,
+                employer_id INTEGER,
+                salary_avg real,
+                salary_from_rub real,
+                salary_to_rub real,
+                FOREIGN KEY(currency_id) REFERENCES currency(currency_id),
+                FOREIGN KEY(employer_id) REFERENCES employers(employer_id))
+        """)
+        conn.commit()
+        cur.close()
+    except psycopg2.errors.DuplicateTable:
+        print('таблица vacancies уже создана')
+    except psycopg2.errors.InFailedSqlTransaction:
+        cur.close()
+
+def write_currency(conn):
+    '''заполняет справочник курсов валют'''
+    list_currency = [('RUR', 'Российский рубль', 1), ('USD', 'Доллар США', 97.31), ('EUR', 'Евро', 102.55),
+                     ('BYR', 'Белорусский рубль', 29.5776), ('KZT', 'Казахстанский тенге', 0.203576),
+                     ('UZS', 'Узбекский сум', 0.00797149), ('KGS', 'Киргизский сом', 1.04)]
+
+    #conn = None
+    # db_manager = DBManager(conn)
+    # conn = db_manager.connects_db()
+    try:
+        for pos in list_currency:
+            cur = conn.cursor()  # создаем курсор на каждую запись
+            cur.execute('INSERT INTO currency(currency_id, currency_name, exchange_rate)'
+                    ' VALUES (%s, %s, %s) ON CONFLICT DO NOTHING',
+                    (pos[0], pos[1], pos[2]))
+            cur.close()
+            conn.commit()
+    except psycopg2.errors.InFailedSqlTransaction:
+        cur.close()
