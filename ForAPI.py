@@ -71,13 +71,14 @@ class ForAPI_hh(ForAPI):
         #print(cls.responce.status_code)
         #print(cls.responce.text)
         cls.all_vacancies = json.loads(cls.responce.text)
-        #print(all_vacancies)
+        print(cls.all_vacancies)
         return cls.all_vacancies
 
     @classmethod
     def make_list_vacancies(cls):
         '''из полученного массива данных формируем список словарей нужной структуры'''
         cls.list_vacancies = []
+
         for vacancy in cls.all_vacancies['items']:
             # print()
             # print(vacancy)
@@ -86,10 +87,11 @@ class ForAPI_hh(ForAPI):
             id_item = temp_dict['id']
             name = temp_dict['name']
             salary = temp_dict['salary']
-
+            employer = temp_dict['employer']
+            print(employer)
             url = temp_dict['url']
             requirement = temp_dict['snippet']['requirement']
-            employer_id = temp_dict['employer']['id']
+
             employer_name = temp_dict['employer']['name']
             # responsibility = temp_dict['snippet']['responsibility']
             #решаем проблемы с незаполненными полями по зарплате
@@ -113,6 +115,13 @@ class ForAPI_hh(ForAPI):
                 gross_bd = 0
             else:
                 gross_bd = 1
+            if employer == None:
+                employer_id = 0
+            else:
+                if 'id' not in employer:
+                    employer_id = 0
+                else:
+                    employer_id = temp_dict['employer']['id']
 
             data = {'id':id_item, 'name': name, 'salary_from': salary_from, 'salary_to': salary_to,
                     'currency': currency,

@@ -11,7 +11,7 @@ class DBManager:
         '''подключает к БД'''
         conn = psycopg2.connect(
             host='localhost',
-            database='KR161023_API_DataBase',
+            database='kr_api_database',
             user='postgres',
             password=PASSWORD
         )
