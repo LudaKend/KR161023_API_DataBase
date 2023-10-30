@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from ForAPI import ForAPI_hh
 from DBManager import DBManager
 URL_SITE_HH = 'https://api.hh.ru/vacancies/'
@@ -218,5 +219,39 @@ def save_vacancies(rows):
             conn.commit()
         db_manager.disables_db()
 
+def create_db():
+    '''удаляет и создает БД'''
+    database_name = 'KR161023_API_DataBase1'
+    parser = ConfigParser()
+    # read config file
+    parser.read("database.ini")   #считываем параметры для подключения к POSGRESQL
+    dict_db = {}
+    if parser.has_section("postgresql"):
+        params = parser.items("postgresql")
+        for param in params:
+            dict_db[param[0]] = param[1]
 
+    else:
+        raise Exception(
+            'Section {0} is not found in the {1} file.'.format(database_name, "database.ini"))
+    print(dict_db)
+    dict_db['password'] = PASSWORD
+    print(dict_db)
+    conn = psycopg2.connect(dbname='postgres', **dict_db)
+    conn.autocommit = True
+    cur = conn.cursor()
 
+    cur.execute(f"DROP DATABASE IF EXISTS {database_name}")
+    cur.execute(f"CREATE DATABASE {database_name}")
+    cur.close()
+    #conn.commit()
+    conn.close()
+
+def create_tables():
+    '''создает таблицы в БД'''
+    conn = psycopg2.connect(
+        host='localhost',
+        database='KR161023_API_DataBase1',
+        user='postgres',
+        password=PASSWORD
+    )
