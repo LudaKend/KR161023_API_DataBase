@@ -219,9 +219,9 @@ def save_vacancies(rows):
             conn.commit()
         db_manager.disables_db()
 
-def create_db():
+def create_db(database):
     '''удаляет и создает БД'''
-    database_name = 'KR161023_API_DataBase1'
+    database_name = database #'KR161023_API_DataBase1'
     parser = ConfigParser()
     # read config file
     parser.read("database.ini")   #считываем параметры для подключения к POSGRESQL
@@ -247,11 +247,53 @@ def create_db():
     #conn.commit()
     conn.close()
 
-def create_tables():
+def create_tables(database):
     '''создает таблицы в БД'''
+
     conn = psycopg2.connect(
-        host='localhost',
-        database='KR161023_API_DataBase1',
-        user='postgres',
-        password=PASSWORD
-    )
+         host='localhost',
+         database='kr161023_api_database1', #database, #'KR161023_API_DataBase1',
+         user='postgres',
+         password=PASSWORD
+     )
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE employers (
+                employer_id INTEGER PRIMARY KEY,
+                employer_name VARCHAR(100)
+            )
+        """)
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE currency (
+                currency_id varchar(3) PRIMARY KEY,
+                currency_name varchar(20),
+                exchange_rate real	
+            )
+        """)
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE vacancies (
+                vacancy_id INTEGER PRIMARY KEY,
+                vacancy_name varchar(100),
+                salary_from real,
+                salary_to real,
+                currency_id varchar(3),
+                gross INTEGER,
+                url varchar,
+                requirement varchar,
+                employer_id INTEGER,
+                salary_avg real,
+                salary_from_rub real,
+                salary_to_rub real	
+            )
+        """)
+    conn.commit()
+    conn.close()
+
+def write_currency():
+    '''заполняет справочник курсов валют'''
+    pass
