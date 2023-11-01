@@ -18,25 +18,7 @@
 2.Используемые технологии
 Программа реализована на python 3.11, БД создаются в PostgreSQL
 
-3.содержимое pyproject.toml
-
-[tool.poetry]
-name = "kr161023-api-datebase"
-version = "0.1.0"
-description = "[]"
-authors = ["None"]
-license = "[]"
-readme = "README.md"
-packages = [{include = "kr161023_api_datebase"}]
-
-[tool.poetry.dependencies]
-python = "3.11"
-Add11 = "0"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+3.прилагается в pyproject.toml
 
 4.эндпоинты
 При первоначальной загрузке информации о вакансиях (пункт меню '0') используется стандартный API 'https://api.hh.ru/vacancies/' 

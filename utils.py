@@ -1,6 +1,6 @@
 from configparser import ConfigParser
-from ForAPI import ForAPI_hh
-from DBManager import DBManager
+from for_api import ForAPI_hh
+from db_manager import DBManager
 URL_SITE_HH = 'https://api.hh.ru/vacancies/'
 
 import psycopg2
@@ -317,9 +317,6 @@ def write_currency(conn):
                      ('BYR', 'Белорусский рубль', 29.5776), ('KZT', 'Казахстанский тенге', 0.203576),
                      ('UZS', 'Узбекский сум', 0.00797149), ('KGS', 'Киргизский сом', 1.04)]
 
-    #conn = None
-    # db_manager = DBManager(conn)
-    # conn = db_manager.connects_db()
     try:
         for pos in list_currency:
             cur = conn.cursor()  # создаем курсор на каждую запись
