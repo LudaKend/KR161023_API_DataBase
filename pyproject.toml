@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "kr161023-api-datebase"
+version = "0.1.0"
+description = "[]"
+authors = ["None"]
+license = "[]"
+readme = "README.md"
+packages = [{include = "kr161023_api_datebase"}]
+
+[tool.poetry.dependencies]
+python = "3.11"
+Add11 = "0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
