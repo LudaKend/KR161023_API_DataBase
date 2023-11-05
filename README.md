@@ -24,6 +24,15 @@
 создать виртуальное окружение командой poetry env use python3.11
 активировать виртуальное окружение командой poetry shell
 создать переменную окружения FOR_POSTGRES, в ней сохранить пароль к БД PostgreSQL
+Параметры для подключения к БД PostgreSQL необходимо сохранить в файле "database.ini".
+Содержимое данного файла:
+
+[postgresql]
+host=localhost
+user=postgres
+password=PASSWORD
+port=5432
+
 Запустить main.py
 
 4.эндпоинты
